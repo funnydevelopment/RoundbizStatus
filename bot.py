@@ -1,6 +1,9 @@
 import asyncio
 import logging
 
+from create_bot import bot, dp
+from core.handlers import router
+
 
 logger = logging.getLogger(__name__)
 
@@ -12,6 +15,11 @@ async def run_bot() -> None:
         "[%(asctime)s] - %(name)s - %(message)s",
     )
 
+    dp.include_router(router)
+
+    logger.info("Start bot")
+
+    await dp.start_polling(bot)
 
 
 if __name__ == "__main__":
