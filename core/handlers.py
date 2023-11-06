@@ -7,17 +7,11 @@ from aiogram.fsm.context import FSMContext
 from .states import RequestBotState
 from .services import get_order_data, is_valid_uuid, get_message_text, has_access
 from .message_texts import HELLO_TEXT, WRONG_FORMAT_TEXT, WRONG_USER_TEXT, HELP_TEXT
-from create_bot import config
 
 
 router = Router()
 
 logger = logging.getLogger(__name__)
-
-
-# todo: 1. create a text to help button
-#  2. if user is not in allowed list then dont give an access
-#  3. code docker files
 
 
 @router.message(Command("start"))
