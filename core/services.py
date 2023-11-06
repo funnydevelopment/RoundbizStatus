@@ -1,6 +1,23 @@
+import uuid
+
 import aiohttp
 
 from create_bot import config
+
+
+async def is_valid_uuid(uuid_str: str) -> bool:
+    try:
+        uuid_obj = uuid.UUID(uuid_str)
+        return True
+    except ValueError:
+        return False
+
+
+async def get_message_text(data: dict) -> str:
+    message = ""
+    for key, value in data.items():
+        message += f"{key}: <b>{value}</b>\n"
+    return message
 
 
 async def get_order_data(tx_id: str) -> dict:
