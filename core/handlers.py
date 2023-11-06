@@ -5,8 +5,8 @@ from aiogram.filters import Command
 from aiogram.fsm.context import FSMContext
 
 from .states import RequestBotState
-from .services import get_order_data, is_valid_uuid, get_message_text
-from .message_texts import HELLO_TEXT, WRONG_FORMAT_TEXT, WRONG_USER_TEXT
+from .services import get_order_data, is_valid_uuid, get_message_text, has_access
+from .message_texts import HELLO_TEXT, WRONG_FORMAT_TEXT, WRONG_USER_TEXT, HELP_TEXT
 from create_bot import config
 
 
@@ -19,40 +19,49 @@ logger = logging.getLogger(__name__)
 #  2. if user is not in allowed list then dont give an access
 #  3. code docker files
 
+
 @router.message(Command("start"))
 async def start_command(message: types.Message, state: FSMContext):
     user_id = str(message.from_user.id)
-    user_name = ""
     try:
         user_name = message.from_user.full_name
     except Exception as error:
         logger.info(f"something went wrong: {error}")
         user_name = user_id
-    allowed_users = config.tg_bot.USER_ID.split(",")
-    if user_id in allowed_users:
-        await message.delete()
+    user_has_access = await has_access(user_id)
+    await message.delete()
+    if user_has_access:
         await message.answer(text=HELLO_TEXT.format(user_name=user_name))
     else:
-        await message.delete()
         await message.answer(text=WRONG_USER_TEXT)
     await state.set_state(state=RequestBotState.main_state)
 
 
 @router.message(Command("help"))
 async def start_command(message: types.Message, state: FSMContext):
+    user_id = str(message.from_user.id)
     await message.delete()
-    await message.answer("help button was tapped")
+    user_has_access = await has_access(user_id)
+    if user_has_access:
+        await message.answer(text=HELP_TEXT)
+    else:
+        await message.answer(text=WRONG_USER_TEXT)
     await state.set_state(state=RequestBotState.main_state)
 
 
 @router.message()
 async def echo(message: types.Message, state: FSMContext):
-    text = message.text
+    text, user_id = message.text, str(message.from_user.id)
     is_text_uuid = await is_valid_uuid(text)
-    if is_text_uuid:
-        result = await get_order_data(text)
-        message_text = await get_message_text(result)
-        await message.reply(text=message_text)
+    user_has_access = await has_access(user_id)
+    if user_has_access:
+        if is_text_uuid:
+            result = await get_order_data(text)
+            message_text = await get_message_text(result)
+            await message.reply(text=message_text)
+        else:
+            await message.reply(text=WRONG_FORMAT_TEXT)
     else:
-        await message.reply(text=WRONG_FORMAT_TEXT)
+        await message.delete()
+        await message.answer(text=WRONG_USER_TEXT)
     await state.set_state(state=RequestBotState.main_state)
