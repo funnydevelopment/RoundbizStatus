@@ -20,6 +20,13 @@ async def get_message_text(data: dict) -> str:
     return message
 
 
+async def has_access(user_id: str) -> bool:
+    allowed_users = config.tg_bot.USER_ID.split(",")
+    if user_id in allowed_users:
+        return True
+    return False
+
+
 async def get_order_data(tx_id: str) -> dict:
     url = config.service.URL
     params = {
