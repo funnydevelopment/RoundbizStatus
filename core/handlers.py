@@ -15,6 +15,10 @@ router = Router()
 logger = logging.getLogger(__name__)
 
 
+# todo: 1. create a text to help button
+#  2. if user is not in allowed list then dont give an access
+#  3. code docker files
+
 @router.message(Command("start"))
 async def start_command(message: types.Message, state: FSMContext):
     user_id = str(message.from_user.id)
@@ -23,6 +27,7 @@ async def start_command(message: types.Message, state: FSMContext):
         user_name = message.from_user.full_name
     except Exception as error:
         logger.info(f"something went wrong: {error}")
+        user_name = user_id
     allowed_users = config.tg_bot.USER_ID.split(",")
     if user_id in allowed_users:
         await message.delete()
